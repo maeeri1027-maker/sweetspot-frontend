@@ -36,11 +36,10 @@ X（旧Twitter）、Instagramのショート動画、TikTokなどで「近場の
 
 ```mermaid
 graph TD
-    ユーザー[ユーザー (ブラウザ)] --> フロントエンド[Vercel / React]
-    フロントエンド -->|REST API| バックエンド[Render / Spring Boot]
-    バックエンド -->|JDBC| DB[(Neon / PostgreSQL)]
-
----
+    User[ユーザー (ブラウザ)] --> Frontend[Vercel / React]
+    Frontend -->|REST API| Backend[Render / Spring Boot]
+    Backend -->|JDBC| DB[(Neon / PostgreSQL)]
+```
 
 ## ✨ 主要機能一覧
 
@@ -71,4 +70,7 @@ graph TD
 ## 👤 制作者
 
 - **開発者:** mitani
+
+```
+
 ```
