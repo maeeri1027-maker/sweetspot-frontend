@@ -1,0 +1,86 @@
+/* Google Fonts から「M PLUS Rounded 1c（丸ゴシック）」と英字「Quicksand」を読み込み */
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&family=Quicksand:wght@600;700&display=swap");
+
+/* ========================================
+  ナチュラル・カフェテーマ
+   ======================================== */
+:root {
+  /* 背景とベースカラー */
+  --bg-dark: #f8f5f0; /* 温かみのあるアイボリー背景 */
+  --surface: #ffffff; /* カードの背景（白） */
+  --border: #e2ded8; /* 薄い区切り線 */
+
+  /* ★ 文字色をブラウン系に変更 ★ */
+  --text-primary: #5c4b43; /* メイン文字色：ショコラブラウン */
+  --text-muted: #9c8c84; /* 補足文字色：カフェオレブラウン */
+
+  /* ポップ＆パステルのアクセントカラー */
+  --accent-pink: #ff85a1; /* メインボタン */
+  --accent-purple: #8a70d6; /* タグ・リンク */
+  --accent-yellow: #fec859; /* サブアクセント */
+
+  /* ステータスカラー */
+  --status-visited: #68bd62; /* 行った：抹茶グリーン */
+  --status-interested: #ff6b81; /* 気になる：コーラルピンク */
+  --status-someday: #f7a239; /* 時間があれば：ウォームオレンジ */
+  --danger: #ff6b81; /* 削除ボタン */
+}
+
+/* 全体の基本設定 */
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  /* ★ 丸ゴシックフォントを全体に適用 ★ */
+  font-family:
+    "M PLUS Rounded 1c",
+    "Quicksand",
+    -apple-system,
+    sans-serif;
+  margin: 0;
+  padding: 24px;
+}
+
+/* アクションボタンのアニメーション */
+button {
+  font-family: "M PLUS Rounded 1c", "Quicksand", sans-serif;
+  transition: all 0.2s ease-in-out !important;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+select,
+input,
+textarea {
+  font-family: "M PLUS Rounded 1c", sans-serif;
+  color: var(--text-primary);
+}
+
+/* ふわふわ縦揺れするアニメーション定義 */
+@keyframes floatY {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px); /* 上に8px持ち上がる */
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* 画像に適用するクラス（ゆっくり揺れる） */
+.animated-logo-img {
+  animation: floatY 2.5s ease-in-out infinite;
+}
+
+/* 文字に適用するクラス（少しタイミングをずらして跳ねる） */
+.animated-logo-text {
+  animation: floatY 2.5s ease-in-out 0.3s infinite; /* 0.3秒遅らせることでリズム感を出す */
+}
