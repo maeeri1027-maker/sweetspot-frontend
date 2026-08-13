@@ -34,13 +34,10 @@ X（旧Twitter）、Instagramのショート動画、TikTokなどで「近場の
 
 ### インフラ構成図
 
-[ ユーザー (ブラウザ) ]
-│
-├─► [ Vercel ] (React フロントエンド)
-│ │
-│ └─► [ Render ] (Spring Boot REST API)
-│ │
-└─────────────────┴─► [ Neon ] (PostgreSQL データベース)
+graph TD
+User[ユーザー (ブラウザ)] --> Frontend[Vercel / React]
+Frontend -->|REST API| Backend[Render / Spring Boot]
+Backend -->|JDBC| DB[(Neon / PostgreSQL)]
 
 ---
 
