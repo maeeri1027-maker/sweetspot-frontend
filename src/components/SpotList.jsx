@@ -434,12 +434,12 @@ export default function SpotList() {
                     <img
                       src={
                         (spot.imageUrls && spot.imageUrls[0]) ||
-                        "/default-spot.png"
+                        "/illustration/67.png"
                       }
                       alt={spot.name}
                       onError={(e) => {
                         e.target.onerror = null; // 無限ループ防止
-                        e.target.src = "/public/illustration/67.png"; // 画像読み込み失敗時の代替画像
+                        e.target.src = "/illustration/67.png"; // ★ /public を削除
                       }}
                       style={{
                         width: viewMode === "grid" ? "100%" : "140px",
