@@ -34,10 +34,11 @@ X（旧Twitter）、Instagramのショート動画、TikTokなどで「近場の
 
 ### インフラ構成図
 
+```mermaid
 graph TD
-User[ユーザー (ブラウザ)] --> Frontend[Vercel / React]
-Frontend -->|REST API| Backend[Render / Spring Boot]
-Backend -->|JDBC| DB[(Neon / PostgreSQL)]
+    ユーザー[ユーザー (ブラウザ)] --> フロントエンド[Vercel / React]
+    フロントエンド -->|REST API| バックエンド[Render / Spring Boot]
+    バックエンド -->|JDBC| DB[(Neon / PostgreSQL)]
 
 ---
 
@@ -70,3 +71,4 @@ Backend -->|JDBC| DB[(Neon / PostgreSQL)]
 ## 👤 制作者
 
 - **開発者:** mitani
+```
