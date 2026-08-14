@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// ★ 1. spotService と apiClient のインポート
 import { getSpotById, updateSpot } from "../services/spotService";
-import apiClient from "../apiClient";
 
 const MAX_SUB_PHOTOS = 4;
+const MAX_IMAGE_SIZE = 800; // 長辺最大800pxに自動圧縮
 
 export default function SpotEdit() {
   const { id } = useParams();
@@ -22,16 +21,13 @@ export default function SpotEdit() {
   const [tasteReview, setTasteReview] = useState("");
   const [mainPhotoUrl, setMainPhotoUrl] = useState("");
   const [subPhotoUrls, setSubPhotoUrls] = useState([""]);
-  const [uploading, setUploading] = useState({});
 
-  // ★ 2. 状態管理（初期読み込み中・更新中・エラーメッセージ）を追加
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const categoryOptions = ["カフェ", "スイーツ", "洋食", "和食", "中華"];
 
-  // ★ 3. 初期データの取得処理を spotService (Axios) へ置き換え
   useEffect(() => {
     const fetchSpotData = async () => {
       try {
@@ -67,43 +63,67 @@ export default function SpotEdit() {
     fetchSpotData();
   }, [id]);
 
-  // ★ 4. 画像アップロードを apiClient に統一
-  const uploadFile = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await apiClient.post("/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+  // ★ ブラウザ（Canvas）で画像を軽量化 & Base64化する関数（サーバー通信なし）
+  const compressAndConvertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_IMAGE_SIZE) {
+              height = Math.round((height * MAX_IMAGE_SIZE) / width);
+              width = MAX_IMAGE_SIZE;
+            }
+          } else {
+            if (height > MAX_IMAGE_SIZE) {
+              width = Math.round((width * MAX_IMAGE_SIZE) / height);
+              height = MAX_IMAGE_SIZE;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // 画質0.7（70%）でJPEG変換し、容量を軽量化
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
     });
-    return res.data.url;
   };
 
   const handleMainPhotoFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading((prev) => ({ ...prev, main: true }));
     try {
-      const url = await uploadFile(file);
-      setMainPhotoUrl(url);
+      const base64Url = await compressAndConvertToBase64(file);
+      setMainPhotoUrl(base64Url);
     } catch (err) {
       console.error(err);
-      alert("写真のアップロードに失敗しました");
-    } finally {
-      setUploading((prev) => ({ ...prev, main: false }));
+      alert("写真の読み込みに失敗しました");
     }
   };
 
   const handleSubPhotoFile = async (index, e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading((prev) => ({ ...prev, [index]: true }));
     try {
-      const url = await uploadFile(file);
-      handleSubPhotoChange(index, url);
+      const base64Url = await compressAndConvertToBase64(file);
+      handleSubPhotoChange(index, base64Url);
     } catch (err) {
       console.error(err);
-      alert("写真のアップロードに失敗しました");
-    } finally {
-      setUploading((prev) => ({ ...prev, [index]: false }));
+      alert("写真の読み込みに失敗しました");
     }
   };
 
@@ -131,7 +151,6 @@ export default function SpotEdit() {
     setSubPhotoUrls(subPhotoUrls.filter((_, i) => i !== index));
   };
 
-  // ★ 5. 送信（更新）処理のバリデーション・二重送信防止を追加
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -140,14 +159,8 @@ export default function SpotEdit() {
       return;
     }
 
-    const isImageUploading = Object.values(uploading).some((isUp) => isUp);
-    if (isImageUploading) {
-      alert("画像のアップロードが完了するまでお待ちください。");
-      return;
-    }
-
     const imageUrls = [mainPhotoUrl, ...subPhotoUrls]
-      .map((url) => url.trim())
+      .map((url) => (url ? url.trim() : ""))
       .filter((url) => url !== "");
 
     const updatedSpot = {
@@ -188,7 +201,6 @@ export default function SpotEdit() {
   };
   const inputStyle = { width: "100%", padding: "8px", boxSizing: "border-box" };
 
-  // データ初期取得中の表示
   if (loading) {
     return (
       <div
@@ -218,7 +230,6 @@ export default function SpotEdit() {
         スポット編集
       </h2>
 
-      {/* エラーメッセージ表示 */}
       {errorMessage && (
         <div
           style={{
@@ -250,7 +261,6 @@ export default function SpotEdit() {
           />
         </div>
 
-        {/* ステータス選択 */}
         <div>
           <label style={labelStyle}>ステータス</label>
           <div style={{ display: "flex", gap: "15px" }}>
@@ -277,7 +287,6 @@ export default function SpotEdit() {
           </div>
         </div>
 
-        {/* 行った日付入力欄 */}
         {status?.trim() === "行った" && (
           <div
             style={{
@@ -352,7 +361,6 @@ export default function SpotEdit() {
           />
         </div>
 
-        {/* 味の感想 */}
         <div>
           <label style={labelStyle}>味の感想</label>
           <textarea
@@ -363,7 +371,6 @@ export default function SpotEdit() {
           />
         </div>
 
-        {/* メイン写真 */}
         <div>
           <label style={labelStyle}>メイン写真（ホーム画面に表示）</label>
           <input
@@ -372,17 +379,6 @@ export default function SpotEdit() {
             onChange={handleMainPhotoFile}
             style={inputStyle}
           />
-          {uploading.main && (
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--text-muted)",
-                margin: "5px 0",
-              }}
-            >
-              アップロード中...
-            </p>
-          )}
           {mainPhotoUrl && (
             <img
               src={mainPhotoUrl}
@@ -399,7 +395,6 @@ export default function SpotEdit() {
           )}
         </div>
 
-        {/* サブ写真 */}
         <div>
           <label style={labelStyle}>
             サブ写真（最大{MAX_SUB_PHOTOS}枚・詳細のみ表示）
@@ -430,17 +425,6 @@ export default function SpotEdit() {
                   ×
                 </button>
               </div>
-              {uploading[index] && (
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    margin: "5px 0",
-                  }}
-                >
-                  アップロード中...
-                </p>
-              )}
               {url && (
                 <img
                   src={url}
@@ -498,7 +482,6 @@ export default function SpotEdit() {
           />
         </div>
 
-        {/* ボタンエリア（二重送信防止用に disabled を適用） */}
         <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
           <button
             type="button"
