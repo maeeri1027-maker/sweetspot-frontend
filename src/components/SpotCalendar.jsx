@@ -9,9 +9,15 @@ export default function SpotCalendar({ spots }) {
 
   const BASE_URL = "https://sweetspot-7kzg.onrender.com";
 
+  // 修正後コード
   const getImageUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith("http://") || url.startsWith("https://")) {
+    // ★ "data:" (Base64データ) もそのまま返すように追加
+    if (
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:")
+    ) {
       return url;
     }
     const cleanPath = url.startsWith("/") ? url : `/${url}`;
